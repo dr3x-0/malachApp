@@ -14,6 +14,7 @@ class _CreatorPageState extends State<CreatorPage> {
 
   late TextEditingController titleController = TextEditingController(); 
   late TextEditingController descController = TextEditingController();
+  late TextEditingController photoUrlController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,7 @@ class _CreatorPageState extends State<CreatorPage> {
           //controllers
           MyTextField(hintText: "Title", controller: titleController),
           MyTextField(hintText: "Desc", controller: descController),
+          MyTextField(hintText: "photoUrl", controller: photoUrlController),
 
           // SEND BUTTON
           IconButton(

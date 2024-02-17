@@ -3,6 +3,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:malachapp/auth/auth_service.dart';
 import 'package:malachapp/components/drawer.dart';
+import 'package:malachapp/components/post_widget.dart';
 import 'package:malachapp/components/reloadable_widget.dart';
 import 'package:malachapp/components/topbar.dart';
 import 'package:malachapp/pages/creator.dart';
@@ -116,6 +117,7 @@ class HomeHome extends StatefulWidget {
 class _HomeHomeState extends State<HomeHome> {
   late Future<List<String>> imageUrls;
   late Stream<QuerySnapshot<Map<String, dynamic>>> testData;
+  late Stream<QuerySnapshot<Map<String, dynamic>>> postsData;
   // final notificationService = NotificationService();
 
   @override
@@ -124,6 +126,7 @@ class _HomeHomeState extends State<HomeHome> {
     // Initial loading of data
     imageUrls = widget.storage.getImageUrls('test');
     testData = widget.firebaseFirestore.collection('test').snapshots();
+    postsData = widget.firebaseFirestore.collection('posts').snapshots();
   }
   // refreshing the content
   Future<void> _refresh() async {
@@ -131,6 +134,7 @@ class _HomeHomeState extends State<HomeHome> {
     setState(() {
       imageUrls = widget.storage.getImageUrls('test');
       testData = widget.firebaseFirestore.collection('test').snapshots();
+      postsData = widget.firebaseFirestore.collection('posts').snapshots();
     });
   }
 
@@ -147,6 +151,11 @@ class _HomeHomeState extends State<HomeHome> {
               child: Center(
                 child: Column(
                   children: [
+                    PostWidget(
+                      imagePath: '',
+                      title: 'Title',
+                      description: 'Description',
+                    ),
                     StorageLoader(storage: widget.storage, uri: 'test'),
                     const SizedBox(height: 10),
                     StreamBuilder(
@@ -176,6 +185,39 @@ class _HomeHomeState extends State<HomeHome> {
                                 title: Text(data['test']),
                               );
                             }).toList(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    // posts
+
+                    StreamBuilder(
+                      stream: postsData,
+                      builder: (
+                        BuildContext context,
+                        AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot,
+                      ) {
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        return Expanded(
+                          child: ListView(
+                            children: snapshot.data!.docs.map(
+                              (QueryDocumentSnapshot<Map<String, dynamic>> document) {
+                                Map<String, dynamic> data = document.data();
+                                return PostWidget(
+                                  imagePath: data['photoUrl'],
+                                  title: data['title'],
+                                  description: data['description'],
+                                );
+                              },
+                            ).toList(),
                           ),
                         );
                       },
